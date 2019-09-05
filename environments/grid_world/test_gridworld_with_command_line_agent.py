@@ -1,4 +1,4 @@
-from agents import RandomAgent
+from agents import CommandLineAgent
 from environments import GridWorldGameState
 from runners import run_to_the_end
 
