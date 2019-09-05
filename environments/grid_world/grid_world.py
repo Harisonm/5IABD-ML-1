@@ -1,6 +1,7 @@
-import numpy as np
-from typing import List
 import os
+from typing import List
+
+import numpy as np
 
 from contracts import GameState
 
@@ -39,7 +40,12 @@ class GridWorldGameState(GameState):
         return 0
 
     def clone(self) -> 'GameState':
-        pass
+        gs_copy = GridWorldGameState()
+        gs_copy.scores = self.scores.copy()
+        gs_copy.player_pos = self.player_pos.copy()
+        gs_copy.game_over = self.game_over
+        gs_copy.remaining_actions = self.remaining_actions
+        return gs_copy
 
     def step(self, player_index: int, action_index: int):
         assert (not self.game_over)
@@ -92,3 +98,6 @@ class GridWorldGameState(GameState):
             str_acc += f"{os.linesep}"
 
         return str_acc
+
+    def get_unique_id(self) -> int:
+        return self.player_pos[0] * self.world.shape[1] + self.player_pos[1]

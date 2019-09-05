@@ -1,5 +1,6 @@
-import numpy as np
 from typing import List
+
+import numpy as np
 
 
 class GameState:
@@ -26,6 +27,10 @@ class GameState:
 
     def __str__(self):
         raise NotImplementedError
+
+    def get_unique_id(self) -> int:
+        raise NotImplementedError
+
 
 
 class Agent:
