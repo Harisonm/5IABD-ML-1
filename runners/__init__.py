@@ -22,7 +22,7 @@ def run_to_the_end(agents: List[Agent], gs: GameState):
         run_step(agents, gs)
 
 
-def run_for_n_games_and_print_stats(agents: List[Agent], gs: GameState, games_count: int):
+def run_for_n_games_and_return_stats(agents: List[Agent], gs: GameState, games_count: int) -> (np.ndarray, np.ndarray):
     total_scores = np.zeros_like(gs.get_scores())
 
     for _ in range(games_count):
@@ -30,5 +30,24 @@ def run_for_n_games_and_print_stats(agents: List[Agent], gs: GameState, games_co
         run_to_the_end(agents, gs_copy)
         total_scores += gs_copy.get_scores()
 
+    return total_scores, total_scores / games_count
+
+
+def run_for_n_games_and_print_stats(agents: List[Agent], gs: GameState, games_count: int):
+    total_scores, mean_scores = run_for_n_games_and_return_stats(agents, gs, games_count)
+
     print(f"Total Scores : {total_scores}")
-    print(f"Mean Scores : {total_scores/games_count}")
+    print(f"Mean Scores : {mean_scores}")
+
+
+def run_for_n_games_and_return_max(agents: List[Agent], gs: GameState, games_count: int) -> np.ndarray:
+    old_and_new_scores = np.ones((2, len(gs.get_scores()))) * -9999.9
+
+    for _ in range(games_count):
+        gs_copy = gs.clone()
+        run_to_the_end(agents, gs_copy)
+        new_scores = gs_copy.get_scores()
+        old_and_new_scores[1, :] = new_scores
+        old_and_new_scores[0, :] = np.max(old_and_new_scores, axis=0)
+
+    return old_and_new_scores[0, :]
