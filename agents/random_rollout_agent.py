@@ -27,7 +27,7 @@ class RandomRolloutAgent(Agent):
                 (total_scores, _) = run_for_n_games_and_return_stats(self.agents, gs_clone, self.epochs_per_action)
                 accumulated_scores[i] = total_scores[gs.get_active_player()]
 
-        print((accumulated_scores, available_actions[np.argmax(accumulated_scores)]))
+        # print((accumulated_scores, available_actions[np.argmax(accumulated_scores)]))
         return available_actions[np.argmax(accumulated_scores)]
 
     def observe(self, r: float, t: bool, player_index: int):
