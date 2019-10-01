@@ -101,3 +101,15 @@ class GridWorldGameState(GameState):
 
     def get_unique_id(self) -> int:
         return self.player_pos[0] * self.world.shape[1] + self.player_pos[1]
+
+    def get_max_state_count(self) -> int:
+        return self.world.shape[0] * self.world.shape[1]
+
+    def get_action_space_size(self) -> int:
+        return len(self.available_actions)
+
+    def get_vectorized_state(self) -> np.ndarray:
+        return np.array(
+            (float(self.player_pos[0]) / self.world.shape[0] * 2.0 - 1.0,
+             float(self.player_pos[1]) / self.world.shape[1] * 2.0 - 1.0)
+        )

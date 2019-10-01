@@ -93,6 +93,19 @@ class TicTacToeGameState(GameState):
             acc += (3 ** i) * (self.board[i // 3, i % 3] + 1)
         return acc
 
+    def get_max_state_count(self) -> int:
+        return 3 ** 9
+
+    def get_action_space_size(self) -> int:
+        return 9
+
+    def get_vectorized_state(self) -> np.ndarray:
+        state_vec = np.zeros(3*3*3)
+        for i in range(3):
+            for j in range(3):
+                state_vec[i * 3 * 3 + j * 3 + (self.board[i, j] + 1)] = 1
+        return state_vec
+
 
 if __name__ == "__main__":
     gs = TicTacToeGameState()

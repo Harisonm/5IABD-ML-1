@@ -31,6 +31,14 @@ class GameState:
     def get_unique_id(self) -> int:
         raise NotImplementedError
 
+    def get_max_state_count(self) -> int:
+        raise NotImplementedError
+
+    def get_action_space_size(self) -> int:
+        raise NotImplementedError
+
+    def get_vectorized_state(self) -> np.ndarray:
+        raise NotImplementedError
 
 
 class Agent:
