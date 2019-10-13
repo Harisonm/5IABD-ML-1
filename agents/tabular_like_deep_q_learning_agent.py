@@ -3,6 +3,7 @@ from tensorflow.python.keras.utils import *
 
 from brains import DQNBrain
 from contracts import Agent, GameState
+import numpy as np
 
 
 class TabularLikeDeepQLearningAgent(Agent):
