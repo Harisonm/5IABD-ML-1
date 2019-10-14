@@ -6,15 +6,6 @@ import numpy as np
 from contracts import GameState
 
 
-# Chaque joueur possède les mêmes navires, dont le nombre et le type dépendent des règles du jeu choisies.
-
-# Une disposition peut ainsi comporter :
-
-# 1 porte-avions (5 cases)
-# 1 croiseur (4 cases)
-# 2 contre-torpilleurs (3 cases)
-# 1 torpilleur (2 cases)
-
 class BattleshipGameState(GameState):
 
     def __init__(self):
@@ -25,9 +16,10 @@ class BattleshipGameState(GameState):
 
         self.game_over = False
         self.scores = np.zeros(2)
-        self.available_actions = [5, 4, 3, 3, 2]  # porte-avions croiseur contre-torpilleurs torpilleur
-        self.attack_actions = [1]  # Attack
-        self.remaining_actions = 50
+        self.available_actions = [5, 4, 3, 3, 2]
+        self.attack_actions = [1]
+        self.remaining_boat = [17, 17]
+        self.remaining_action = [[a for a in range(100)] for x in range(2)]
         self.active_player = 0
         self.boat_vector = {
             5: np.array([5, 5, 5, 5, 5]),
@@ -44,24 +36,6 @@ class BattleshipGameState(GameState):
 
     def get_active_player(self) -> int:
         return self.active_player
-
-    def clone(self) -> 'GameState':
-        gs_clone = BattleshipGameState()
-        gs_clone.game_over = self.game_over
-        gs_clone.attack_actions = self.attack_actions
-        gs_clone.active_player = self.active_player
-        gs_clone.scores = self.scores.copy()
-        gs_clone.available_actions = self.available_actions.copy()
-        gs_clone.board_j1 = self.board_j1.copy()
-        gs_clone.board_attack_j1 = self.board_attack_j1.copy()
-        gs_clone.board_j2 = self.board_j2.copy()
-        gs_clone.board_attack_j2 = self.board_attack_j2.copy()
-        return gs_clone
-
-    def step(self, player_index: int, action_index: int):
-        assert (not self.game_over)
-        assert (player_index == self.active_player)
-        return 0
 
     def put_boat_and_save_position(self, boat_type: int, plateau: str):
         vh = random.randint(0, 1)  # 0 : vertical -/- 1 : horizontal
@@ -85,14 +59,25 @@ class BattleshipGameState(GameState):
             self.put_boat_and_save_position(x, 'board_j1')
             self.put_boat_and_save_position(x, 'board_j2')
 
-    def attack_boat(self):
-        pass
+    def step(self, player_index: int, action_index: int):
+        assert (not self.game_over)
+        assert (player_index == self.active_player)
 
-    def check_boat(self):
-        pass
+        (wanted_i, wanted_j) = (action_index // 10, action_index % 10)
+        potential_cell_type = vars(self)['board_attack_j' + str(player_index)][wanted_i, wanted_j]
+        assert (potential_cell_type == 0)
+        vars(self)['board_attack_j' + str(player_index)][wanted_i, wanted_j] = \
+            vars(self)['board_attack_j' + str(player_index + 1 % 2)][wanted_i, wanted_j] if \
+            vars(self)['board_attack_j' + str(player_index + 1 % 2)][wanted_i, wanted_j] != 0 else 9
+        if vars(self)['board_attack_j' + str(player_index)][wanted_i, wanted_j] != 9:
+            self.remaining_boat[player_index] -= 1
+        self.remaining_action[player_index].remove(action_index)
+        if self.remaining_boat == 0:
+            self.game_over = True
+        return
 
     def get_scores(self) -> np.ndarray:
-        pass
+        return self.scores
 
     def get_available_actions(self, player_index: int) -> List[int]:
         pass
@@ -101,39 +86,31 @@ class BattleshipGameState(GameState):
         pass
 
     def get_unique_id(self) -> int:
-        pass
+        acc = 0
+        for i in range(100):
+            acc += (10 ** i) * (vars(self)['board_attack_j' + str(self.active_player)][i // 10, i % 10] + 1)
+        return acc
 
     def get_max_state_count(self) -> int:
-        pass
+        return 3 ** 100
 
     def get_action_space_size(self) -> int:
-        pass
+        return 100
 
     def get_vectorized_state(self) -> np.ndarray:
         pass
 
-    # board = np.array([
-    #     [2, 2, 0, 0, 0, 0, 4, 4, 4, 4],
-    #     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    #     [4, 0, 0, 0, 0, 0, 0, 0, 0, 2],
-    #     [4, 0, 0, 0, 0, 0, 0, 0, 0, 2],
-    #     [4, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    #     [4, 0, 0, 0, 0, 0, 0, 0, 0, 3],
-    #     [0, 0, 0, 0, 0, 0, 0, 0, 0, 3],
-    #     [2, 2, 0, 0, 0, 0, 0, 0, 0, 3],
-    #     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    #     [0, 0, 0, 0, 0, 5, 5, 5, 5, 5]
-    # ])
-    #
-    # board_attack = np.array([
-    #     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    #     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    #     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    #     [0, 0, 1, 0, 0, 0, 0, 0, 0, 0],
-    #     [0, 0, 0, 0, 0, 1, 1, 0, 0, 0],
-    #     [0, 1, 0, 0, 0, 0, 0, 1, 0, 1],
-    #     [0, 0, 0, 1, 0, 0, 0, 0, 0, 1],
-    #     [1, 1, 0, 0, 0, 0, 0, 0, 0, 0],
-    #     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    #     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    # ])
+    def clone(self) -> 'GameState':
+        # TODO not finish
+        gs_clone = BattleshipGameState()
+        gs_clone.game_over = self.game_over
+        gs_clone.attack_actions = self.attack_actions
+        gs_clone.active_player = self.active_player
+        gs_clone.scores = self.scores.copy()
+        gs_clone.available_actions = self.available_actions.copy()
+        gs_clone.board_j1 = self.board_j1.copy()
+        gs_clone.board_attack_j1 = self.board_attack_j1.copy()
+        gs_clone.board_j2 = self.board_j2.copy()
+        gs_clone.board_attack_j2 = self.board_attack_j2.copy()
+        gs_clone.remaining_boat = self.remaining_boat.copy()
+        return gs_clone
