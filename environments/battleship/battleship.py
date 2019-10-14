@@ -67,12 +67,12 @@ class BattleshipGameState(GameState):
         potential_cell_type = vars(self)['board_attack_j' + str(player_index)][wanted_i, wanted_j]
         assert (potential_cell_type == 0)
         vars(self)['board_attack_j' + str(player_index)][wanted_i, wanted_j] = \
-            vars(self)['board_attack_j' + str(player_index + 1 % 2)][wanted_i, wanted_j] if \
-            vars(self)['board_attack_j' + str(player_index + 1 % 2)][wanted_i, wanted_j] != 0 else 9
+            vars(self)['board_j' + str(player_index + 1 % 2)][wanted_i, wanted_j] if \
+            vars(self)['board_j' + str(player_index + 1 % 2)][wanted_i, wanted_j] != 0 else 9
         if vars(self)['board_attack_j' + str(player_index)][wanted_i, wanted_j] != 9:
             self.remaining_boat[player_index] -= 1
         self.remaining_action[player_index].remove(action_index)
-        if self.remaining_boat == 0:
+        if self.remaining_boat[player_index] == 0:
             self.game_over = True
         return
 
