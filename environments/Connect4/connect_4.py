@@ -33,6 +33,42 @@ class Puissance4GameState(GameState):
         gs_clone.board = self.board.copy()
         return gs_clone
 
+    def array_contains_four(self, array):
+        count, i = 0
+        while count < 4 and i < len(array):
+            if array[i] == array[i+1]:
+                count = count+1
+            else:
+                count = 0
+            i = i+1
+        if count == 3:
+            return True
+        else:
+            return False
+
+    def get_diag(self):
+        a = self.board
+        diags = [a[::-1, :].diagonal(i) for i in range(-a.shape[0] + 1, a.shape[1])]
+        diags.extend(a.diagonal(i) for i in range(a.shape[1] - 1, -a.shape[0], -1))
+        diag_list = []
+        for n in diags:
+            if len(n) > 3:
+                diag_list.append(n)
+        return diag_list
+
+    def contains_four(self):
+        boolean_contains_four = False
+        arrays = self.get_diag()  # get diagonal arrays in a list
+        for i in range(5):
+            arrays.append(self.board[i, :]) # append all rows
+            arrays.append(self.board[:, i]) # append all cols
+        arrays.append(self.board[:, 6])  # append the last col
+
+        for a in arrays:
+            boolean_contains_four = self.array_contains_four(self, a)
+            if boolean_contains_four : return True
+        return boolean_contains_four
+
     def step(self, player_index: int, action_index: int):
         assert (not self.game_over)
         assert (player_index == self.active_player)
@@ -52,42 +88,22 @@ class Puissance4GameState(GameState):
 
         if self.board[0, action_index] != -1:
             self.available_actions.remove(action_index)
-        """
-        TODO
-            recup diagonale montante et descendante, 
-            ligne:  array = board[i,:]
-            colonne: array = board[:,j]
-        """
-        if self.board[wanted_i, 0] == self.board[wanted_i, 1] == self.board[wanted_i, 2] or \
-                self.board[0, wanted_j] == self.board[1, wanted_j] == self.board[2, wanted_j] or \
-                self.board[0, 0] == self.board[1, 1] == self.board[2, 2] == player_index or \
-                self.board[0, 2] == self.board[1, 1] == self.board[2, 0] == player_index:
+
+        if self.contains_four():
             self.game_over = True
             self.scores[player_index] = 1
             self.scores[(player_index + 1) % 2] = -1
             return
-
-        for i in range(3):
-            for j in range(3):
+        
+        # Passer la main à l'autre joueur
+        for i in range(5):
+            for j in range(6):
                 if self.board[i, j] == -1:
                     self.active_player = (self.active_player + 1) % 2
                     return
 
         self.game_over = True
         return
-
-    def is_game_over(self, array):
-        count, i = 0
-        while count < 4 and i < len(array):
-            if array[i] == array[i+1]:
-                count = count+1
-            else:
-                count = 0
-            i = i+1
-        if count == 3:
-            return True
-        else:
-            return False
 
     def get_scores(self) -> np.ndarray:
         return self.scores
