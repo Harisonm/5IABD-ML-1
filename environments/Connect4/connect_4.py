@@ -34,10 +34,14 @@ class Puissance4GameState(GameState):
         return gs_clone
 
     def array_contains_four(self, array):
-        count, i = 0
-        while count < 4 and i < len(array):
-            if array[i] == array[i+1]:
+        count = 0
+        i = 0
+        print('array = ', array)
+        while count < 4 and i < len(array)-1:
+            if array[i] != -1 and array[i] == array[i+1]:
                 count = count+1
+                if count == 3:
+                    return True
             else:
                 count = 0
             i = i+1
@@ -59,14 +63,15 @@ class Puissance4GameState(GameState):
     def contains_four(self):
         boolean_contains_four = False
         arrays = self.get_diag()  # get diagonal arrays in a list
-        for i in range(5):
+        for i in range(6):
             arrays.append(self.board[i, :]) # append all rows
             arrays.append(self.board[:, i]) # append all cols
         arrays.append(self.board[:, 6])  # append the last col
 
         for a in arrays:
-            boolean_contains_four = self.array_contains_four(self, a)
-            if boolean_contains_four : return True
+            boolean_contains_four = self.array_contains_four(a)
+            if boolean_contains_four:
+                return True
         return boolean_contains_four
 
     def step(self, player_index: int, action_index: int):
@@ -94,7 +99,7 @@ class Puissance4GameState(GameState):
             self.scores[player_index] = 1
             self.scores[(player_index + 1) % 2] = -1
             return
-        
+
         # Passer la main à l'autre joueur
         for i in range(5):
             for j in range(6):
