@@ -7,7 +7,7 @@ import numpy as np
 from contracts import GameState
 
 
-class Puissance4GameState(GameState):
+class Connect4GameState(GameState):
     def __init__(self):
         self.game_over = False
         self.active_player = 0
@@ -25,7 +25,7 @@ class Puissance4GameState(GameState):
         return self.active_player
 
     def clone(self) -> 'GameState':
-        gs_clone = Puissance4GameState()
+        gs_clone = Connect4GameState()
         gs_clone.game_over = self.game_over
         gs_clone.active_player = self.active_player
         gs_clone.scores = self.scores.copy()
@@ -141,5 +141,5 @@ class Puissance4GameState(GameState):
 
 
 if __name__ == "__main__":
-    gs = Puissance4GameState()
+    gs = Connect4GameState()
     print(gs)
