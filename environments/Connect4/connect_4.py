@@ -134,8 +134,8 @@ class Connect4GameState(GameState):
 
     def get_unique_id(self) -> int:
         acc = 0
-        for i in range(9):
-            acc += (3 ** i) * (self.board[i // 3, i % 3] + 1)
+        for i in range(42):
+            acc += (3 ** i) * (self.board[i // 6, i % 7] + 1)
         return acc
 
 
