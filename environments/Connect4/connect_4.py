@@ -36,7 +36,6 @@ class Connect4GameState(GameState):
     def array_contains_four(self, array):
         count = 0
         i = 0
-        print('array = ', array)
         while count < 4 and i < len(array)-1:
             if array[i] != -1 and array[i] == array[i+1]:
                 count = count+1
