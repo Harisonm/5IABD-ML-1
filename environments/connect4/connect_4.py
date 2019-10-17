@@ -135,7 +135,7 @@ class Connect4GameState(GameState):
     def get_unique_id(self) -> int:
         acc = 0
         for i in range(42):
-            acc += (3 ** i) * (self.board[i // 6, i % 7] + 1)
+            acc += (3 ** i) * (self.board[i // 7, i % 7] + 1)
         return acc
 
     def get_max_state_count(self) -> int:
@@ -148,7 +148,7 @@ class Connect4GameState(GameState):
         state_vec = np.zeros(3*6*7)
         for i in range(6):
             for j in range(7):
-                state_vec[i * 3 * 6 + j * 7 + (self.board[i, j] + 1)] = 1
+                state_vec[i * 7 * 3 + j * 3 + (self.board[i, j] + 1)] = 1
         return state_vec
 
 
