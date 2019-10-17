@@ -1,5 +1,5 @@
 from agents import CommandLineAgent, RandomAgent, RandomRolloutAgent
-from environments.connect4.connect_4 import Connect4GameState
+from environments.connect4 import Connect4GameState
 from runners import run_to_the_end
 
 if __name__ == "__main__":
