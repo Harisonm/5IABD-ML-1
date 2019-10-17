@@ -123,7 +123,7 @@ class Connect4GameState(GameState):
         for i, line in enumerate(self.board):
             for j, cell_type in enumerate(line):
                 if cell_type == -1:
-                    str_acc += " "
+                    str_acc += "-"
                 elif cell_type == 0:
                     str_acc += "X"
                 else:
