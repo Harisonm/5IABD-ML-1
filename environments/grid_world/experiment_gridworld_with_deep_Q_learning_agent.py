@@ -4,8 +4,8 @@ from runners import run_for_n_games_and_print_stats, run_step
 
 if __name__ == "__main__":
     gs = GridWorldGameState()
-    agent = DeepQLearningAgent(action_space_size=gs.get_action_space_size())
-
+    agent = DeepQLearningAgent(action_space_size=gs.get_action_space_size(), hidden_layers=5,
+                               neurons_per_hidden_layer=128)
     for i in range(500):
         run_for_n_games_and_print_stats([agent], gs, 100)
 

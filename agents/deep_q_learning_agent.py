@@ -11,14 +11,16 @@ from contracts import Agent, GameState
 
 class DeepQLearningAgent(Agent):
     def __init__(self,
+                 hidden_layers: int,
+                 neurons_per_hidden_layer: int,
                  action_space_size: int,
                  alpha: float = 0.01,
                  gamma: float = 0.999,
                  epsilon: float = 0.1,
                  ):
         self.Q = DQNBrain(output_dim=action_space_size, learning_rate=alpha,
-                          hidden_layers_count=5,
-                          neurons_per_hidden_layer=128)
+                          hidden_layers_count=hidden_layers,
+                          neurons_per_hidden_layer=neurons_per_hidden_layer)
         self.action_space_size = action_space_size
         self.s = None
         self.a = None
