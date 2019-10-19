@@ -9,10 +9,10 @@ from contracts import GameState
 class BattleshipGameState(GameState):
 
     def __init__(self):
+        self.board_j0 = np.zeros((10, 10), dtype=int)
+        self.board_attack_j0 = np.zeros((10, 10), dtype=int)
         self.board_j1 = np.zeros((10, 10), dtype=int)
         self.board_attack_j1 = np.zeros((10, 10), dtype=int)
-        self.board_j2 = np.zeros((10, 10), dtype=int)
-        self.board_attack_j2 = np.zeros((10, 10), dtype=int)
 
         self.game_over = False
         self.scores = np.zeros(2)
@@ -56,8 +56,8 @@ class BattleshipGameState(GameState):
 
     def put_all_boat(self):
         for x in self.available_actions:
+            self.put_boat_and_save_position(x, 'board_j0')
             self.put_boat_and_save_position(x, 'board_j1')
-            self.put_boat_and_save_position(x, 'board_j2')
 
     def step(self, player_index: int, action_index: int):
         assert (not self.game_over)
@@ -66,12 +66,19 @@ class BattleshipGameState(GameState):
         (wanted_i, wanted_j) = (action_index // 10, action_index % 10)
         potential_cell_type = vars(self)['board_attack_j' + str(player_index)][wanted_i, wanted_j]
         assert (potential_cell_type == 0)
+
         vars(self)['board_attack_j' + str(player_index)][wanted_i, wanted_j] = \
             vars(self)['board_j' + str(player_index + 1 % 2)][wanted_i, wanted_j] if \
             vars(self)['board_j' + str(player_index + 1 % 2)][wanted_i, wanted_j] != 0 else 9
         if vars(self)['board_attack_j' + str(player_index)][wanted_i, wanted_j] != 9:
             self.remaining_boat[player_index] -= 1
+
+        print(f'player index : {player_index}')
+        print(vars(self)['board_attack_j' + str(player_index)])
+
         self.remaining_action[player_index].remove(action_index)
+        print(action_index)
+
         if self.remaining_boat[player_index] == 0:
             self.game_over = True
         return
@@ -80,7 +87,7 @@ class BattleshipGameState(GameState):
         return self.scores
 
     def get_available_actions(self, player_index: int) -> List[int]:
-        pass
+        return self.available_actions
 
     def __str__(self):
         pass
@@ -108,9 +115,9 @@ class BattleshipGameState(GameState):
         gs_clone.active_player = self.active_player
         gs_clone.scores = self.scores.copy()
         gs_clone.available_actions = self.available_actions.copy()
+        gs_clone.board_j0 = self.board_j0.copy()
+        gs_clone.board_attack_j0 = self.board_attack_j0.copy()
         gs_clone.board_j1 = self.board_j1.copy()
         gs_clone.board_attack_j1 = self.board_attack_j1.copy()
-        gs_clone.board_j2 = self.board_j2.copy()
-        gs_clone.board_attack_j2 = self.board_attack_j2.copy()
         gs_clone.remaining_boat = self.remaining_boat.copy()
         return gs_clone
