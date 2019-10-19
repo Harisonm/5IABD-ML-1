@@ -9,10 +9,10 @@ from contracts import GameState
 class BattleshipGameState(GameState):
 
     def __init__(self):
-        self.board_j0 = np.zeros((10, 10), dtype=int) * -1
-        self.board_attack_j0 = np.zeros((10, 10), dtype=int) * -1
-        self.board_j1 = np.zeros((10, 10), dtype=int) * -1
-        self.board_attack_j1 = np.zeros((10, 10), dtype=int) * -1
+        self.board_j0 = np.ones((10, 10), dtype=int) * -1
+        self.board_attack_j0 = np.ones((10, 10), dtype=int) * -1
+        self.board_j1 = np.ones((10, 10), dtype=int) * -1
+        self.board_attack_j1 = np.ones((10, 10), dtype=int) * -1
 
         self.game_over = False
         self.scores = np.zeros(2)
@@ -26,8 +26,6 @@ class BattleshipGameState(GameState):
             3: np.array([3, 3, 3]),
             2: np.array([2, 2]),
         }
-        self.put_all_boat()
-
 
     def player_count(self) -> int:
         return 2
@@ -43,13 +41,15 @@ class BattleshipGameState(GameState):
         relative_position = random.randint(0, (9 - boat_type))  # position max by boat size
         pos = random.randint(0, 9)
         if vh:
-            if np.sum(vars(self)[plateau][relative_position: relative_position + boat_type, pos: pos + 1]) == 0:
+            if np.sum(vars(self)[plateau][relative_position: relative_position + boat_type, pos: pos + 1]) == (
+                    -1 * boat_type):
                 vars(self)[plateau][relative_position: relative_position + boat_type, pos: pos + 1] = self.boat_vector[
                     boat_type].reshape(boat_type, 1)
             else:
                 self.put_boat_and_save_position(boat_type, plateau)
         else:
-            if np.sum(vars(self)[plateau][pos: pos + 1, relative_position: relative_position + boat_type]) == 0:
+            if np.sum(vars(self)[plateau][pos: pos + 1, relative_position: relative_position + boat_type]) == (
+                    -1 * boat_type):
                 vars(self)[plateau][pos: pos + 1, relative_position: relative_position + boat_type] = self.boat_vector[
                     boat_type]
             else:
@@ -66,16 +66,13 @@ class BattleshipGameState(GameState):
 
         (wanted_i, wanted_j) = (action_index // 10, action_index % 10)
         potential_cell_type = vars(self)['board_attack_j' + str(player_index)][wanted_i, wanted_j]
-        assert (potential_cell_type == 0)
+        assert (potential_cell_type == -1)
 
         vars(self)['board_attack_j' + str(player_index)][wanted_i, wanted_j] = \
             vars(self)['board_j' + str(player_index + 1 % 2)][wanted_i, wanted_j] if \
-            vars(self)['board_j' + str(player_index + 1 % 2)][wanted_i, wanted_j] != -1 else 9
+                vars(self)['board_j' + str(player_index + 1 % 2)][wanted_i, wanted_j] != -1 else 9
         if vars(self)['board_attack_j' + str(player_index)][wanted_i, wanted_j] != 9:
             self.remaining_boat[player_index] -= 1
-
-        print(f'player index : {player_index}')
-        print(vars(self)['board_attack_j' + str(player_index)])
 
         self.remaining_action[player_index].remove(action_index)
         print(action_index)
@@ -99,7 +96,7 @@ class BattleshipGameState(GameState):
             acc += (6 ** i) * (vars(self)['board_attack_j' + str(self.active_player)][i // 10, i % 10] + 1)
         return acc
 
-    def get_max_state_count(self) -> int: # -1 : nothing , 5,4,3,2 : boats, 9 : missed
+    def get_max_state_count(self) -> int:  # -1 : nothing , 5,4,3,2 : boats, 9 : missed
         return 6 ** 100
 
     def get_action_space_size(self) -> int:
