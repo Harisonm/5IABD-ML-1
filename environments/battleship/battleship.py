@@ -9,15 +9,14 @@ from contracts import GameState
 class BattleshipGameState(GameState):
 
     def __init__(self):
-        self.board_j0 = np.zeros((10, 10), dtype=int)
-        self.board_attack_j0 = np.zeros((10, 10), dtype=int)
-        self.board_j1 = np.zeros((10, 10), dtype=int)
-        self.board_attack_j1 = np.zeros((10, 10), dtype=int)
+        self.board_j0 = np.zeros((10, 10), dtype=int) * -1
+        self.board_attack_j0 = np.zeros((10, 10), dtype=int) * -1
+        self.board_j1 = np.zeros((10, 10), dtype=int) * -1
+        self.board_attack_j1 = np.zeros((10, 10), dtype=int) * -1
 
         self.game_over = False
         self.scores = np.zeros(2)
         self.available_actions = [5, 4, 3, 3, 2]
-        self.attack_actions = [1]
         self.remaining_boat = [17, 17]
         self.remaining_action = [[a for a in range(100)] for x in range(2)]
         self.active_player = 0
@@ -27,6 +26,8 @@ class BattleshipGameState(GameState):
             3: np.array([3, 3, 3]),
             2: np.array([2, 2]),
         }
+        self.put_all_boat()
+
 
     def player_count(self) -> int:
         return 2
@@ -69,7 +70,7 @@ class BattleshipGameState(GameState):
 
         vars(self)['board_attack_j' + str(player_index)][wanted_i, wanted_j] = \
             vars(self)['board_j' + str(player_index + 1 % 2)][wanted_i, wanted_j] if \
-            vars(self)['board_j' + str(player_index + 1 % 2)][wanted_i, wanted_j] != 0 else 9
+            vars(self)['board_j' + str(player_index + 1 % 2)][wanted_i, wanted_j] != -1 else 9
         if vars(self)['board_attack_j' + str(player_index)][wanted_i, wanted_j] != 9:
             self.remaining_boat[player_index] -= 1
 
@@ -95,11 +96,11 @@ class BattleshipGameState(GameState):
     def get_unique_id(self) -> int:
         acc = 0
         for i in range(100):
-            acc += (10 ** i) * (vars(self)['board_attack_j' + str(self.active_player)][i // 10, i % 10] + 1)
+            acc += (6 ** i) * (vars(self)['board_attack_j' + str(self.active_player)][i // 10, i % 10] + 1)
         return acc
 
-    def get_max_state_count(self) -> int:
-        return 3 ** 100
+    def get_max_state_count(self) -> int: # -1 : nothing , 5,4,3,2 : boats, 9 : missed
+        return 6 ** 100
 
     def get_action_space_size(self) -> int:
         return 100
@@ -108,13 +109,11 @@ class BattleshipGameState(GameState):
         pass
 
     def clone(self) -> 'GameState':
-        # TODO not finish
         gs_clone = BattleshipGameState()
         gs_clone.game_over = self.game_over
-        gs_clone.attack_actions = self.attack_actions
         gs_clone.active_player = self.active_player
         gs_clone.scores = self.scores.copy()
-        gs_clone.available_actions = self.available_actions.copy()
+        gs_clone.remaining_action = self.remaining_action.copy()
         gs_clone.board_j0 = self.board_j0.copy()
         gs_clone.board_attack_j0 = self.board_attack_j0.copy()
         gs_clone.board_j1 = self.board_j1.copy()
