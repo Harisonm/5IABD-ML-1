@@ -1,23 +1,31 @@
 from tensorflow.python.keras.metrics import *
 from tensorflow.python.keras.utils import *
 
-from brains import DQNBrain
+from brains import PPOValueBrain, PPOPolicyBrain
 from contracts import Agent, GameState
-
-
-# si gs1 == gs2 => hash(gs1) == hash(gs2)
-# si gs1 != gs2 => hash(gs1) != hash(gs2) || hash(gs1) == hash(gs2)
 
 
 class PPOAgent(Agent):
     def __init__(self,
+                 state_space_size: int,
                  action_space_size: int,
-                 alpha: float = 0.01,
+                 alpha: float = 0.0001,
                  gamma: float = 0.999,
                  epsilon: float = 0.1,
                  episodes_count_between_training: int = 100,
-
                  ):
+        self.critic = PPOValueBrain(
+            learning_rate=alpha,
+            hidden_layers_count=5,
+            neurons_per_hidden_layer=128
+        )
+        self.actor = PPOPolicyBrain(
+            learning_rate=alpha,
+            state_dim=state_space_size,
+            output_dim=action_space_size,
+            hidden_layers_count=5,
+            neurons_per_hidden_layer=128
+        )
         self.action_space_size = action_space_size
         self.episodes_count_between_training = episodes_count_between_training
         self.s = []
@@ -39,18 +47,35 @@ class PPOAgent(Agent):
         self.epsilon = epsilon
 
     def act(self, gs: GameState) -> int:
-        #gs_unique_id = gs.get_unique_id()
+        gs_unique_id = gs.get_unique_id()
         available_actions = gs.get_available_actions(gs.get_active_player())
 
         state_vec = gs.get_vectorized_state()
 
-        chosen_action = np.random.choice(available_actions)
-        self.v.append(0.0)
+        mask_vec = np.zeros((self.action_space_size,))
+        mask_vec[available_actions] = 1.0
+
+        v = self.critic.predict(state_vec)
+        p = self.actor.predict(state_vec, mask_vec)
+
+        indexes = np.arange(self.action_space_size)
+        chosen_action = np.random.choice(indexes, p=p)
+
+        # valid_actions_probability = p[available_actions]
+        # valid_actions_probability_sum = np.sum(valid_actions_probability)
+        # normalized_valid_action_probability = valid_actions_probability / valid_actions_probability_sum
+        # #
+        # chosen_action = np.random.choice(available_actions, p=normalized_valid_action_probability)
+
+        self.v.append(v)
+
         self.s.append(state_vec)
+        self.m.append(mask_vec)
         self.a.append(to_categorical(chosen_action, self.action_space_size))
         if not self.is_last_episode_terminal:
             self.r.append(self.r_temp)
         self.r_temp = 0.0
+        self.is_last_episode_terminal = False
 
         return chosen_action
 
@@ -68,9 +93,10 @@ class PPOAgent(Agent):
                 self.train()
                 self.buffer['states'].clear()
                 self.buffer['chosen_actions'].clear()
-                self.buffer['gain'].clear()
+                self.buffer['gains'].clear()
                 self.buffer['advantages'].clear()
                 self.buffer['masks'].clear()
+                self.current_episode_count = 0
             self.s.clear()
             self.a.clear()
             self.r.clear()
@@ -86,6 +112,15 @@ class PPOAgent(Agent):
             last_gain = self.r[i] + self.gamma * last_gain
             self.buffer['states'].append(self.s[i])
             self.buffer['chosen_actions'].append(self.a[i])
-            self.buffer['gain'].append(last_gain)
+            self.buffer['gains'].append(last_gain)
             self.buffer['advantages'].append(last_gain - self.v[i])
             self.buffer['masks'].append(self.m[i])
+
+    def train(self):
+        self.critic.train(np.array(self.buffer['states']),
+                          np.array(self.buffer['gains']))
+        self.actor.train(np.array(self.buffer['states']),
+                         np.array(self.buffer['masks']),
+                         np.array(self.buffer['chosen_actions']),
+                         np.array(self.buffer['advantages']),
+                         )
