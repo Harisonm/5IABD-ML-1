@@ -12,7 +12,7 @@ class Connect4GameState(GameState):
         self.game_over = False
         self.active_player = 0
         self.scores = np.zeros(2)
-        self.available_actions = [0, 1, 2, 3, 4, 5, 6] # nb col
+        self.available_actions = [0, 1, 2, 3, 4, 5, 6]  # nb col
         self.board = np.ones((6, 7), dtype=np.int) * -1
 
     def player_count(self) -> int:
@@ -36,53 +36,45 @@ class Connect4GameState(GameState):
     def array_contains_four(self, array):
         count = 0
         i = 0
-        while count < 4 and i < len(array)-1:
-            if array[i] != -1 and array[i] == array[i+1]:
-                count = count+1
+        len_a = len(array)
+        if len_a < 4:
+            return False
+        while count < 4 and i < (len_a - 1):
+            if array[i] != -1 and array[i] == array[i + 1]:
+                count = count + 1
                 if count == 3:
                     return True
             else:
                 count = 0
-            i = i+1
+            i = i + 1
         if count == 3:
             return True
         else:
             return False
 
-    def get_diag(self):
-        a = self.board
-        diags = [a[::-1, :].diagonal(i) for i in range(-a.shape[0] + 1, a.shape[1])]
-        diags.extend(a.diagonal(i) for i in range(a.shape[1] - 1, -a.shape[0], -1))
-        diag_list = []
-        for n in diags:
-            if len(n) > 3:
-                diag_list.append(n)
-        return diag_list
-
-    def contains_four(self):
-        boolean_contains_four = False
-        arrays = self.get_diag()  # get diagonal arrays in a list
-        for i in range(6):
-            arrays.append(self.board[i, :]) # append all rows
-            arrays.append(self.board[:, i]) # append all cols
-        arrays.append(self.board[:, 6])  # append the last col
+    def contains_four(self, action_i: int, action_j: int):
+        arrays = [self.board[action_i, :],
+                  self.board[:, action_j],
+                  np.diagonal(self.board, (action_i - action_j) + 1),
+                  np.diagonal(np.flip(self.board, 1), (action_i - action_j) + 1)]
+        print(arrays)
 
         for a in arrays:
             boolean_contains_four = self.array_contains_four(a)
             if boolean_contains_four:
                 return True
-        return boolean_contains_four
+        return False
 
     def step(self, player_index: int, action_index: int):
         assert (not self.game_over)
         assert (player_index == self.active_player)
         assert (0 <= action_index <= 6)
-        assert (self.board[0, action_index] == -1) # on verifie qu'il y a des case vides sur cette col
+        assert (self.board[0, action_index] == -1)  # on verifie qu'il y a des case vides sur cette col
 
         wanted_j = action_index
-        i = 5 # LA LIGNE 5 EST EN BAS ET LA LIGNE 0 EST EN HAUT
+        i = 5  # LA LIGNE 5 EST EN BAS ET LA LIGNE 0 EST EN HAUT
         while self.board[i, wanted_j] != -1 and i >= 0:
-            i = i-1
+            i = i - 1
         wanted_i = i
 
         potential_cell_type = self.board[wanted_i, wanted_j]
@@ -93,7 +85,7 @@ class Connect4GameState(GameState):
         if self.board[0, action_index] != -1:
             self.available_actions.remove(action_index)
 
-        if self.contains_four():
+        if self.contains_four(wanted_i, wanted_j):
             self.game_over = True
             self.scores[player_index] = 1
             self.scores[(player_index + 1) % 2] = -1
@@ -145,7 +137,7 @@ class Connect4GameState(GameState):
         return 7
 
     def get_vectorized_state(self) -> np.ndarray:
-        state_vec = np.zeros(3*6*7)
+        state_vec = np.zeros(3 * 6 * 7)
         for i in range(6):
             for j in range(7):
                 state_vec[i * 7 * 3 + j * 3 + (self.board[i, j] + 1)] = 1
