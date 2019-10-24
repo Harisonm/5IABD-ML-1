@@ -57,7 +57,6 @@ class Connect4GameState(GameState):
                   self.board[:, action_j],
                   np.diagonal(self.board, (action_i - action_j) + 1),
                   np.diagonal(np.flip(self.board, 1), (action_i - action_j) + 1)]
-        print(arrays)
 
         for a in arrays:
             boolean_contains_four = self.array_contains_four(a)
