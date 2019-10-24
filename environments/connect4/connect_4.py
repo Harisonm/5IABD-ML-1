@@ -37,8 +37,6 @@ class Connect4GameState(GameState):
         count = 0
         i = 0
         len_a = len(array)
-        if len_a < 4:
-            return False
         while count < 4 and i < (len_a - 1):
             if array[i] != -1 and array[i] == array[i + 1]:
                 count = count + 1
@@ -55,8 +53,8 @@ class Connect4GameState(GameState):
     def contains_four(self, action_i: int, action_j: int):
         arrays = [self.board[action_i, :],
                   self.board[:, action_j],
-                  np.diagonal(self.board, (action_i - action_j) + 1),
-                  np.diagonal(np.flip(self.board, 1), (action_i - action_j) + 1)]
+                  np.diagonal(self.board, (action_j - action_i)),
+                  np.diagonal(np.flip(self.board, 1), 6 - (action_j + action_i))]
 
         for a in arrays:
             boolean_contains_four = self.array_contains_four(a)
