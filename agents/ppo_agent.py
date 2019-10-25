@@ -47,7 +47,7 @@ class PPOAgent(Agent):
         self.epsilon = epsilon
 
     def act(self, gs: GameState) -> int:
-        #gs_unique_id = gs.get_unique_id()
+
         available_actions = gs.get_available_actions(gs.get_active_player())
 
         state_vec = gs.get_vectorized_state()
@@ -91,11 +91,11 @@ class PPOAgent(Agent):
             self.compute_gains_and_advantages()
             if self.current_episode_count == self.episodes_count_between_training:
                 self.train()
-                self.buffer['states'].clear()
-                self.buffer['chosen_actions'].clear()
-                self.buffer['gains'].clear()
-                self.buffer['advantages'].clear()
-                self.buffer['masks'].clear()
+                self.buffer.get('states').clear()
+                self.buffer.get('chosen_actions').clear()
+                self.buffer.get('gains').clear()
+                self.buffer.get('advantages').clear()
+                self.buffer.get('masks').clear()
                 self.current_episode_count = 0
             self.s.clear()
             self.a.clear()
@@ -110,17 +110,17 @@ class PPOAgent(Agent):
         last_gain = 0.0
         for i in reversed(range(len(self.s))):
             last_gain = self.r[i] + self.gamma * last_gain
-            self.buffer['states'].append(self.s[i])
-            self.buffer['chosen_actions'].append(self.a[i])
-            self.buffer['gains'].append(last_gain)
-            self.buffer['advantages'].append(last_gain - self.v[i])
-            self.buffer['masks'].append(self.m[i])
+            self.buffer.get('states').append(self.s[i])
+            self.buffer.get('chosen_actions').append(self.a[i])
+            self.buffer.get('gains').append(last_gain)
+            self.buffer.get('advantages').append(last_gain - self.v[i])
+            self.buffer.get('masks').append(self.m[i])
 
     def train(self):
-        self.critic.train(np.array(self.buffer['states']),
-                          np.array(self.buffer['gains']))
-        self.actor.train(np.array(self.buffer['states']),
-                         np.array(self.buffer['masks']),
-                         np.array(self.buffer['chosen_actions']),
-                         np.array(self.buffer['advantages']),
+        self.critic.train(np.array(self.buffer.get('states')),
+                          np.array(self.buffer.get('gains')))
+        self.actor.train(np.array(self.buffer.get('states')),
+                         np.array(self.buffer.get('masks')),
+                         np.array(self.buffer.get('chosen_actions')),
+                         np.array(self.buffer.get('advantages')),
                          )
