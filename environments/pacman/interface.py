@@ -1,4 +1,3 @@
-
 class Actor(object):
 
     def rect(self) -> tuple:
@@ -24,6 +23,7 @@ class Actor(object):
 
     def symbol(self):
         pass
+
 
 class Arena(object):
 
@@ -63,4 +63,4 @@ class Arena(object):
     def check_collision(self, a1, a2) -> bool:
         x1, y1, w1, h1 = a1.rect()
         x2, y2, w2, h2 = a2.rect()
-        return (y2 < y1 + h1 and y1 < y2 + h2 and x2 < x1 + w1 and x1 < x2 + w2)
+        return y2 < y1 + h1 and y1 < y2 + h2 and x2 < x1 + w1 and x1 < x2 + w2
