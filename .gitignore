@@ -1,5 +1,11 @@
+# File
 .idea/
 __pycache__/
 *.DS_Store
 *.vscode/
 *.pyc
+
+# Dev container
+.devcontainer/*
+
+# Kubernetes
