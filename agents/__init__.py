@@ -6,3 +6,5 @@ from .tabular_like_deep_q_learning_agent import TabularLikeDeepQLearningAgent
 from .random_rollout_agent import RandomRolloutAgent
 from .ppo_agent import PPOAgent
 from .DDQN_agent import DDQNAgent
+from .DDQN_with_experience_replay_agent import DDQNAgentWithER
+from .DDQN_with_PER_agent import DDQNAgentWithPER
