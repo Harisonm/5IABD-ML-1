@@ -33,45 +33,77 @@ class Connect4GameState(GameState):
         gs_clone.board = self.board.copy()
         return gs_clone
 
-    def array_contains_four(self, array):
-        count = 0
-        i = 0
-        while count < 4 and i < len(array)-1:
-            if array[i] != -1 and array[i] == array[i+1]:
-                count = count+1
-                if count == 3:
-                    return True
-            else:
-                count = 0
-            i = i+1
-        if count == 3:
-            return True
-        else:
-            return False
-
-    def get_diag(self):
-        a = self.board
-        diags = [a[::-1, :].diagonal(i) for i in range(-a.shape[0] + 1, a.shape[1])]
-        diags.extend(a.diagonal(i) for i in range(a.shape[1] - 1, -a.shape[0], -1))
-        diag_list = []
-        for n in diags:
-            if len(n) > 3:
-                diag_list.append(n)
-        return diag_list
-
     def contains_four(self):
-        boolean_contains_four = False
-        arrays = self.get_diag()  # get diagonal arrays in a list
-        for i in range(6):
-            arrays.append(self.board[i, :]) # append all rows
-            arrays.append(self.board[:, i]) # append all cols
-        arrays.append(self.board[:, 6])  # append the last col
+        # Check horizontal locations for win
+        piece = self.active_player
+        for c in range(7 - 3):
+            for r in range(6):
+                if self.board[r][c] == piece and self.board[r][c + 1] == piece and self.board[r][c + 2] == piece and \
+                        self.board[r][c + 3] == piece:
+                    return True
 
-        for a in arrays:
-            boolean_contains_four = self.array_contains_four(a)
-            if boolean_contains_four:
-                return True
-        return boolean_contains_four
+        # Check vertical locations for win
+        for c in range(7):
+            for r in range(6 - 3):
+                if self.board[r][c] == piece and self.board[r + 1][c] == piece and self.board[r + 2][c] == piece and \
+                        self.board[r + 3][c] == piece:
+                    return True
+
+        # Check positively sloped diaganols
+        for c in range(7 - 3):
+            for r in range(6 - 3):
+                if self.board[r][c] == piece and self.board[r + 1][c + 1] == piece and self.board[r + 2][c + 2] == piece and \
+                        self.board[r + 3][c + 3] == piece:
+                    return True
+
+        # Check negatively sloped diaganols
+        for c in range(7 - 3):
+            for r in range(3, 6):
+                if self.board[r][c] == piece and self.board[r - 1][c + 1] == piece and self.board[r - 2][c + 2] == piece and \
+                        self.board[r - 3][c + 3] == piece:
+                    return True
+
+        return False
+
+    # def array_contains_four(self, array):
+    #     count = 0
+    #     i = 0
+    #     while count < 4 and i < len(array)-1:
+    #         if array[i] != -1 and array[i] == array[i+1]:
+    #             count = count+1
+    #             if count == 3:
+    #                 return True
+    #         else:
+    #             count = 0
+    #         i = i+1
+    #     if count == 3:
+    #         return True
+    #     else:
+    #         return False
+    #
+    # def get_diag(self):
+    #     a = self.board
+    #     diags = [a[::-1, :].diagonal(i) for i in range(-a.shape[0] + 1, a.shape[1])]
+    #     diags.extend(a.diagonal(i) for i in range(a.shape[1] - 1, -a.shape[0], -1))
+    #     diag_list = []
+    #     for n in diags:
+    #         if len(n) > 3:
+    #             diag_list.append(n)
+    #     return diag_list
+    #
+    # def contains_four(self):
+    #     boolean_contains_four = False
+    #     arrays = self.get_diag()  # get diagonal arrays in a list
+    #     for i in range(6):
+    #         arrays.append(self.board[i, :]) # append all rows
+    #         arrays.append(self.board[:, i]) # append all cols
+    #     arrays.append(self.board[:, 6])  # append the last col
+    #
+    #     for a in arrays:
+    #         boolean_contains_four = self.array_contains_four(a)
+    #         if boolean_contains_four:
+    #             return True
+    #     return boolean_contains_four
 
     def step(self, player_index: int, action_index: int):
         assert (not self.game_over)
