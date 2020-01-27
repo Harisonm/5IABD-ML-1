@@ -1,0 +1,4 @@
+#!/bin/bash
+python -m environments.tictactoe.experiment_tictactoe_with_random_rollout_versus_random_rollout_agent 1000
+python -m environments.tictactoe.experiment_tictactoe_with_random_rollout_versus_random_rollout_agent 10000
+python -m environments.tictactoe.experiment_tictactoe_with_random_rollout_versus_random_rollout_agent 100000
