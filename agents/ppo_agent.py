@@ -47,7 +47,7 @@ class PPOAgent(Agent):
         self.epsilon = epsilon
 
     def act(self, gs: GameState) -> int:
-        #gs_unique_id = gs.get_unique_id()
+        gs_unique_id = gs.get_unique_id()
         available_actions = gs.get_available_actions(gs.get_active_player())
 
         state_vec = gs.get_vectorized_state()
