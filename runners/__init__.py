@@ -1,3 +1,4 @@
+import timeit
 from typing import List
 import numpy as np
 
@@ -51,3 +52,18 @@ def run_for_n_games_and_return_max(agents: List[Agent], gs: GameState, games_cou
         old_and_new_scores[0, :] = np.max(old_and_new_scores, axis=0)
 
     return old_and_new_scores[0, :]
+
+def run_for_n_games_and_print_stats_1(agents: List[Agent], gs: GameState, games_count: int, name):
+    start = timeit.default_timer()
+    total_scores, mean_scores = run_for_n_games_and_return_stats(agents, gs, games_count)
+    stop = timeit.default_timer()
+    f = open("result.txt", "a")
+    f.write(name + ';')
+    f.write(str(stop - start) + ';')
+    f.write(str(total_scores[0]) + ';' + str(total_scores[1]) + ';')
+    f.write(str(mean_scores[0]) + ';' + str(mean_scores[1]) + ';')
+    f.write('\n')
+    f.close()
+    print('Time: ', stop - start)
+    print(f"Total Scores : {total_scores}")
+    print(f"Mean Scores : {mean_scores}")
