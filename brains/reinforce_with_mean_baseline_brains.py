@@ -1,7 +1,9 @@
+import math
+
 import numpy as np
 import tensorflow.python.keras.backend as K
 from tensorflow.python.keras import Sequential
-from tensorflow.python.keras.activations import linear, tanh
+from tensorflow.python.keras.activations import linear, tanh, softmax
 from tensorflow.python.keras.layers import Dense, Input, Lambda
 from tensorflow.python.keras.losses import mse
 from tensorflow.python.keras.models import Model
@@ -19,18 +21,14 @@ def softmax_with_mask(tensor_and_mask):
     return masked_tensor / (summed_tensor + 1e-10)
 
 
-def build_ppo_loss(advantages, old_pred):
-    def ppo_loss(y_true, y_pred):
-        eps = 0.2
-        entropy_loss = 0.001 * K.mean(K.sum(y_pred * K.log(y_pred + 1e-10), axis=1, keepdims=True))  # Danger : le masque des actions possibles n'est pas pris en compte !!!
-        r = y_pred * y_true / (old_pred * y_true + 1e-10)
-        policy_loss = -K.mean(K.minimum(r * advantages, K.clip(r, 1 - eps, 1 + eps) * advantages))
-        return policy_loss + entropy_loss
+def build_reinforce_with_mean_baseline_loss(advantages, old_pred):
+    def reinforce_loss(y_true, y_pred):
+        return 0.001 * K.mean(K.sum(y_pred * K.log(y_pred + 1e-10) - K.mean(y_pred), axis=1, keepdims=True))
 
-    return ppo_loss
+    return reinforce_loss
 
 
-class PPOPolicyBrain:
+class Reinforce_with_mean_baselinePolicyBrain:
     def __init__(self,
                  state_dim: int,
                  output_dim: int,
@@ -54,7 +52,7 @@ class PPOPolicyBrain:
 
         print(self.model.summary())
 
-        loss = build_ppo_loss(advantages_tensor, old_policy_tensor)
+        loss = build_reinforce_with_mean_baseline_loss(advantages_tensor, old_policy_tensor)
 
         self.model.compile(loss=loss, optimizer=Adam(lr=learning_rate))
 
@@ -90,7 +88,7 @@ class PPOPolicyBrain:
         )
 
 
-class PPOValueBrain:
+class Reinforce_with_mean_baselineValueBrain:
     def __init__(self,
                  learning_rate: float = 0.0001,
                  hidden_layers_count: int = 0,
@@ -100,7 +98,7 @@ class PPOValueBrain:
         for i in range(hidden_layers_count):
             self.model.add(Dense(neurons_per_hidden_layer, activation=tanh))
 
-        self.model.add(Dense(1, activation=linear, use_bias=True))
+        self.model.add(Dense(1, activation=softmax, use_bias=True))
         self.model.compile(loss=mse, optimizer=Adam(lr=learning_rate))
 
     def predict(self, state: np.ndarray) -> np.ndarray:

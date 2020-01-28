@@ -8,3 +8,5 @@ from .ppo_agent import PPOAgent
 from .DDQN_agent import DDQNAgent
 from .DDQN_with_experience_replay_agent import DDQNAgentWithER
 from .DDQN_with_PER_agent import DDQNAgentWithPER
+from .reinforce_agent import ReinforceAgent
+from .reinforce_with_mean_baseline_agent import ReinforceMeanBaselineAgent

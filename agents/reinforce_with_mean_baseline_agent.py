@@ -1,11 +1,11 @@
 from tensorflow.python.keras.metrics import *
 from tensorflow.python.keras.utils import *
 
-from brains import PPOValueBrain, PPOPolicyBrain
+from brains import Reinforce_with_mean_baselineValueBrain, Reinforce_with_mean_baselinePolicyBrain
 from contracts import Agent, GameState
 
 
-class PPOAgent(Agent):
+class ReinforceMeanBaselineAgent(Agent):
     def __init__(self,
                  state_space_size: int,
                  action_space_size: int,
@@ -14,12 +14,12 @@ class PPOAgent(Agent):
                  epsilon: float = 0.1,
                  episodes_count_between_training: int = 100,
                  ):
-        self.critic = PPOValueBrain(
+        self.critic = Reinforce_with_mean_baselineValueBrain(
             learning_rate=alpha,
             hidden_layers_count=5,
             neurons_per_hidden_layer=128
         )
-        self.actor = PPOPolicyBrain(
+        self.actor = Reinforce_with_mean_baselinePolicyBrain(
             learning_rate=alpha,
             state_dim=state_space_size,
             output_dim=action_space_size,
